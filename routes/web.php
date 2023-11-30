@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,44 +14,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get( '/hello/{n1?}/{n2?}', function (?int $n1, ?int $n2 ) {                 // route parameter
-    return view('hello ', ['result'=>$n1+$n2]); 
-})->where('n1','[0-9]+')
-    ->where('n2','[0-9]+');
-
-
-Route::get( '/name', function (){
-    return view('name', ['name' => 'Michael']);
+Route::get('/', function () {
+    return view('welcome');
 });
 
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get( '/date', function (){
-    $todayDate = date("D, dS M Y");
-    $time = date('G');
-    return view('date', ['date' => $todayDate, 'time' => $time]);
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/loop',function(){
-    $tasks = [
-        'My first order',
-        'Second course',
-    ];
-    return view('loop', ['tasks' => $tasks]);
-    
-});
-
-Route::get('/dashboard',function(\Illuminate\Http\Request $request){
-    return ['name' => 'Nikunj'];
-    // dd($request->fullUrl());
-
-    $req = ($request->input('name'));
-    
-    return view('home',['name'=> $req]);
-    
-})->name('Dashboard');
-
-Route::get('/about',function(){
-    
-    return view('about');
-    
-});
+require __DIR__.'/auth.php';
